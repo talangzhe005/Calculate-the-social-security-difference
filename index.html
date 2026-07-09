@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>杭州社保补缴差额计算器</title>
+      <link rel="stylesheet" href="style.css" />
+  
+</head>
+<body>
+<!-- 右上角指南按钮 -->
+    <button class="guide-btn" onclick="openGuide()">📖 补缴核实指南</button>
+
+    <!-- 指南弹窗 -->
+    <div class="guide-overlay" id="guideOverlay" onclick="if(event.target===this)closeGuide()">
+      <div class="guide-modal" id="guideModal"></div>
+    </div>
+
+    <div class="container">
+      <h1>杭州社保补缴差额计算器</h1>
+      <p class="subtitle">余杭区 · 2021-2026年费率</p>
+
+      <!-- 输入区 -->
+      <div class="card">
+        <!-- 模式切换标签 -->
+        <div class="mode-tabs">
+          <button class="mode-tab active" onclick="switchMode('manual')" id="tabManual">
+            📋 手动输入
+          </button>
+          <button class="mode-tab" onclick="switchMode('ocr')" id="tabOcr">
+            📎 截图导入
+          </button>
+        </div>
+
+        <!-- ==================== 手动输入区 ==================== -->
+        <div id="manualSection">
+          <div class="row">
+            <div class="field">
+              <label>正确税前月工资（元）</label>
+              <input
+                type="number"
+                id="correctBaseManual"
+                value="18000"
+                placeholder="如 18000"
+              />
+              <div class="hint">劳动合同约定的税前工资总额</div>
+            </div>
+            <div class="field">
+              <label>之前公司按什么基数交的（元）</label>
+              <input
+                type="number"
+                id="oldBase"
+                value="1700"
+                placeholder="如 1700"
+              />
+              <div class="hint">之前实际缴费基数，可在浙里办APP查到</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>补缴起始年月</label>
+              <input type="month" id="startMonthManual" value="2021-01" />
+            </div>
+            <div class="field">
+              <label>补缴截止年月</label>
+              <input type="month" id="endMonthManual" value="2025-12" />
+            </div>
+            <div class="field">
+              <label>工伤费率（你公司的）</label>
+              <select id="injuryRateManual">
+                <option value="0.2">0.2%</option>
+                <option value="0.4">0.4%</option>
+                <option value="0.5" selected>0.5%（中档，不确定就选这个）</option>
+                <option value="0.7">0.7%</option>
+                <option value="0.9">0.9%</option>
+                <option value="1.1">1.1%</option>
+                <option value="1.3">1.3%</option>
+                <option value="1.5">1.5%</option>
+              </select>
+              <div class="hint">浙里办查历史明细反推，或选0.5%估算</div>
+            </div>
+          </div>
+          <button onclick="calculate()">计算补缴差额</button>
+        </div>
+
+        <!-- ==================== 截图导入区 ==================== -->
+        <div id="ocrSection" style="display:none">
+
+          <!-- API Key 配置 -->
+          <div class="api-key-bar" style="display:flex;gap:8px;align-items:center;margin-bottom:14px;flex-wrap:wrap">
+            <input type="password" id="apiKeyInput"
+              placeholder="输入DashScope API Key"
+              style="flex:1;min-width:180px;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px" />
+            <button class="btn-sm btn-secondary" onclick="saveApiKey()" style="white-space:nowrap">保存Key</button>
+            <a href="https://dashscope.console.aliyun.com/apiKey" target="_blank"
+              style="font-size:11px;color:#4a90d9;white-space:nowrap">去获取免费Key →</a>
+            <span id="apiKeyStatus" style="font-size:11px;color:#999"></span>
+          </div>
+
+          <!-- ====== 粘贴文字（备选） ====== -->
+          <details style="margin-bottom:14px">
+            <summary style="cursor:pointer;font-size:12px;color:#999">📝 或者粘贴文字解析（备选方案）</summary>
+            <div style="margin-top:8px">
+            <textarea id="pasteInput" placeholder="粘贴缴费明细文字，支持逗号/空格分隔&#10;例如：202507,3011000106491343,余杭区,4986,..."
+              style="width:100%;height:80px;border:1px solid #ddd;border-radius:6px;padding:10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+            <button class="btn-sm btn-secondary" onclick="parsePastedText()" style="margin-top:6px">解析粘贴文字</button>
+            </div>
+          </details>
+
+          <!-- 上传区 -->
+          <div class="upload-zone" id="uploadZone"
+               onclick="document.getElementById('fileInput').click()"
+               ondragover="event.preventDefault(); this.classList.add('dragover')"
+               ondragleave="this.classList.remove('dragover')"
+               ondrop="event.preventDefault(); this.classList.remove('dragover'); handleFileDrop(event)">
+            <div class="upload-icon">🖼️</div>
+            <div class="upload-text">点击或拖拽上传浙里办缴费明细截图</div>
+            <div class="upload-sub">支持 WebP / PNG / JPG</div>
+            <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(event)" />
+          </div>
+
+          <!-- 图片预览区 -->
+          <div class="preview-area" id="previewArea">
+            <img id="previewImg" class="preview-img" alt="预览" />
+            <div class="preview-actions">
+              <button class="btn-secondary" onclick="resetUpload()">重新选择</button>
+              <button id="ocrBtn" onclick="startOCR()">🔍 开始识别</button>
+            </div>
+          </div>
+
+          <!-- 进度条 -->
+          <div class="progress-area" id="progressArea">
+            <div class="progress-status" id="progressStatus">正在准备识别...</div>
+            <div class="progress-bar-outer">
+              <div class="progress-bar-inner" id="progressBar"></div>
+            </div>
+          </div>
+
+          <!-- 状态消息 -->
+          <div class="status-msg" id="statusMsg"></div>
+
+          <!-- 结果表格 -->
+          <div class="ocr-results-area" id="ocrResultsArea">
+            <div class="ocr-results-header">
+              <h3 id="ocrResultsTitle">📋 识别结果</h3>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn-sm btn-secondary" onclick="addOcrRow()">+ 添加月份</button>
+                <button class="btn-sm btn-secondary" onclick="resetUpload()">重新上传</button>
+              </div>
+            </div>
+            <table class="ocr-results-table">
+              <thead>
+                <tr>
+                  <th>序号</th>
+                  <th>缴费年月</th>
+                  <th>实际缴费基数（元）</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="ocrResultsBody"></tbody>
+            </table>
+          </div>
+
+          <!-- 原始识别文本（调试用） -->
+          <details class="raw-text-area" id="rawTextArea" style="display:none;margin-top:12px">
+            <summary style="cursor:pointer;font-size:12px;color:#999">📝 查看原始识别文本</summary>
+            <pre id="rawOcrText" style="background:#f9f9f9;border:1px solid #eee;border-radius:6px;padding:10px;font-size:11px;max-height:200px;overflow:auto;white-space:pre-wrap;word-break:break-all;margin-top:6px"></pre>
+          </details>
+
+          <!-- 计算区（识别完成后显示） -->
+          <div id="ocrCalcFields" style="display:none">
+            <div class="row" style="margin-top:16px">
+              <div class="field">
+                <label>正确税前月工资（元）</label>
+                <input type="number" id="correctBaseOcr" value="18000" placeholder="如 18000" />
+                <div class="hint">劳动合同约定的税前工资总额</div>
+              </div>
+              <div class="field">
+                <label>未识别月份的默认旧基数（元）</label>
+                <input type="number" id="fallbackBase" value="1700" placeholder="备用基数" />
+                <div class="hint">缺少导入数据的月份将使用此基数</div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="field">
+                <label>补缴起始年月</label>
+                <input type="month" id="startMonthOcr" value="2021-01" />
+              </div>
+              <div class="field">
+                <label>补缴截止年月</label>
+                <input type="month" id="endMonthOcr" value="2025-12" />
+              </div>
+              <div class="field">
+                <label>工伤费率（你公司的）</label>
+                <select id="injuryRateOcr">
+                  <option value="0.2">0.2%</option>
+                  <option value="0.4">0.4%</option>
+                  <option value="0.5" selected>0.5%</option>
+                  <option value="0.7">0.7%</option>
+                  <option value="0.9">0.9%</option>
+                  <option value="1.1">1.1%</option>
+                  <option value="1.3">1.3%</option>
+                  <option value="1.5">1.5%</option>
+                </select>
+                <div class="hint">浙里办查历史明细反推，或选0.5%估算</div>
+              </div>
+            </div>
+            <button onclick="calculate()">计算补缴差额</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 结果区 -->
+      <div class="result" id="resultArea">
+        <div class="card">
+          <h3 style="margin-bottom: 12px">📊 计算结果</h3>
+          <div class="summary">
+            <div class="summary-box">
+              <div class="num" id="totalPersonal">--</div>
+              <div class="label">你个人需补缴（元）</div>
+            </div>
+            <div class="summary-box">
+              <div class="num orange" id="totalCompany">--</div>
+              <div class="label">公司需补缴（元）</div>
+            </div>
+            <div class="summary-box">
+              <div class="num" id="totalMonthCount">--</div>
+              <div class="label">补缴月数</div>
+            </div>
+          </div>
+          <div class="note">
+            ⚠️ 滞纳金依法由公司承担（《社会保险法》第86条），不在此列。
+          </div>
+          <div id="dataSourceNote" class="note" style="display:none"></div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 12px">📋 分段明细</h3>
+          <div style="overflow-x: auto">
+            <table id="detailTable">
+              <thead>
+                <tr>
+                  <th>时间段</th>
+                  <th>月数</th>
+                  <th>基数差额</th>
+                  <th>个人月补<br />(差额×10.5%)</th>
+                  <th>个人小计</th>
+                  <th>单位月补<br />(差额×单位%)</th>
+                  <th>单位小计</th>
+                </tr>
+              </thead>
+              <tbody id="detailBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 8px">📋 各段费率参考</h3>
+          <table class="rate-table">
+            <thead>
+              <tr>
+                <th>时间段</th>
+                <th>养老(单位)</th>
+                <th>医疗(单位)</th>
+                <th>失业(各)</th>
+                <th>工伤(单位)</th>
+                <th>个人合计</th>
+                <th>单位合计</th>
+              </tr>
+            </thead>
+            <tbody id="rateBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  <script src="app.js"></script>
+</body>
+</html>

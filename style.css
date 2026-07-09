@@ -1,0 +1,547 @@
+* {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, "Microsoft YaHei", sans-serif;
+        background: #f5f5f5;
+        padding: 20px;
+        color: #333;
+      }
+      .container {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 6px;
+        font-size: 22px;
+      }
+      .subtitle {
+        text-align: center;
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 20px;
+      }
+
+      .card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px 24px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+
+      /* ---------- 模式切换标签 ---------- */
+      .mode-tabs {
+        display: flex;
+        gap: 0;
+        margin-bottom: 20px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #ddd;
+      }
+      .mode-tab {
+        flex: 1;
+        padding: 10px 16px;
+        text-align: center;
+        font-size: 14px;
+        cursor: pointer;
+        background: #f9f9f9;
+        color: #666;
+        border: none;
+        transition: all 0.2s;
+      }
+      .mode-tab:first-child {
+        border-right: 1px solid #ddd;
+      }
+      .mode-tab.active {
+        background: #4a90d9;
+        color: #fff;
+        font-weight: 600;
+      }
+      .mode-tab:hover:not(.active) {
+        background: #eef4fb;
+      }
+
+      .row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .field {
+        flex: 1;
+        min-width: 140px;
+        margin-bottom: 14px;
+      }
+      .field label {
+        display: block;
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 4px;
+      }
+      .field input,
+      .field select {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 15px;
+      }
+      .field input:focus,
+      .field select:focus {
+        border-color: #4a90d9;
+        outline: none;
+      }
+
+      .hint {
+        font-size: 12px;
+        color: #999;
+        margin-top: 2px;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        background: #4a90d9;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 6px;
+      }
+      button:hover {
+        background: #3a7bc8;
+      }
+      button:disabled {
+        background: #bbb;
+        cursor: not-allowed;
+      }
+
+      /* ---------- 截图导入区 ---------- */
+      .upload-zone {
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        padding: 36px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        background: #fafafa;
+        min-height: 120px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .upload-zone:hover,
+      .upload-zone.dragover {
+        border-color: #4a90d9;
+        background: #f0f7ff;
+      }
+      .upload-zone .upload-icon {
+        font-size: 36px;
+        color: #bbb;
+      }
+      .upload-zone:hover .upload-icon {
+        color: #4a90d9;
+      }
+      .upload-zone .upload-text {
+        font-size: 14px;
+        color: #888;
+      }
+      .upload-zone .upload-sub {
+        font-size: 12px;
+        color: #bbb;
+      }
+      .upload-zone input[type="file"] {
+        display: none;
+      }
+
+      .preview-area {
+        text-align: center;
+        display: none;
+      }
+      .preview-area.show {
+        display: block;
+      }
+      .preview-img {
+        max-width: 100%;
+        max-height: 320px;
+        border-radius: 8px;
+        border: 1px solid #eee;
+        display: block;
+        margin: 0 auto;
+      }
+
+      .preview-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 12px;
+      }
+      .preview-actions button {
+        flex: 1;
+        margin-top: 0;
+      }
+
+      .btn-secondary {
+        background: #fff;
+        color: #4a90d9;
+        border: 1px solid #4a90d9;
+      }
+      .btn-secondary:hover {
+        background: #f0f7ff;
+      }
+      .btn-sm {
+        width: auto;
+        padding: 6px 14px;
+        font-size: 13px;
+        margin-top: 0;
+      }
+      .btn-danger {
+        background: #e05050;
+        color: #fff;
+        border: none;
+      }
+      .btn-danger:hover {
+        background: #c04040;
+      }
+
+      /* ---------- 进度条 ---------- */
+      .progress-area {
+        display: none;
+        margin: 14px 0;
+      }
+      .progress-area.show {
+        display: block;
+      }
+      .progress-status {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 8px;
+        text-align: center;
+      }
+      .progress-bar-outer {
+        width: 100%;
+        height: 8px;
+        background: #e8e8e8;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .progress-bar-inner {
+        height: 100%;
+        background: #4a90d9;
+        border-radius: 4px;
+        width: 0%;
+        transition: width 0.3s;
+      }
+
+      /* ---------- OCR结果表格 ---------- */
+      .ocr-results-area {
+        display: none;
+      }
+      .ocr-results-area.show {
+        display: block;
+      }
+      .ocr-results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .ocr-results-header h3 {
+        margin: 0;
+        font-size: 15px;
+      }
+      .ocr-results-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        margin-bottom: 12px;
+      }
+      .ocr-results-table th {
+        background: #f7f7f7;
+        padding: 7px 8px;
+        text-align: center;
+        font-weight: 600;
+        border-bottom: 2px solid #ddd;
+        font-size: 12px;
+      }
+      .ocr-results-table td {
+        padding: 5px 6px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+      }
+      .ocr-results-table td input.month-cn {
+        width: 105px;
+        font-size: 13px;
+      }
+      .ocr-results-table td input {
+        width: 110px;
+        padding: 5px 8px;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        font-size: 14px;
+        text-align: center;
+        background: transparent;
+        transition: border-color 0.2s;
+      }
+      .ocr-results-table td input:hover {
+        border-color: #ddd;
+      }
+      .ocr-results-table td input:focus {
+        border-color: #4a90d9;
+        outline: none;
+        background: #fff;
+      }
+      .ocr-results-table .delete-btn {
+        background: none;
+        border: none;
+        color: #e05050;
+        cursor: pointer;
+        font-size: 16px;
+        padding: 2px 8px;
+        margin: 0;
+      }
+      .ocr-results-table .delete-btn:hover {
+        color: #c04040;
+      }
+
+      /* ---------- 状态消息 ---------- */
+      .status-msg {
+        font-size: 13px;
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        display: none;
+      }
+      .status-msg.show {
+        display: block;
+      }
+      .status-msg.info {
+        background: #f0f7ff;
+        color: #4a90d9;
+        border: 1px solid #d0e3f7;
+      }
+      .status-msg.warn {
+        background: #fff8e6;
+        color: #b8780a;
+        border: 1px solid #f0d78c;
+      }
+      .status-msg.error {
+        background: #fff0f0;
+        color: #c04040;
+        border: 1px solid #f0c0c0;
+      }
+
+      .result {
+        display: none;
+      }
+      .result.show {
+        display: block;
+      }
+
+      .summary {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .summary-box {
+        flex: 1;
+        min-width: 150px;
+        background: #f0f7ff;
+        border-radius: 8px;
+        padding: 14px;
+        text-align: center;
+      }
+      .summary-box .num {
+        font-size: 26px;
+        font-weight: 700;
+        color: #4a90d9;
+      }
+      .summary-box .num.orange {
+        color: #e8830c;
+      }
+      .summary-box .label {
+        font-size: 12px;
+        color: #888;
+        margin-top: 2px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      th {
+        background: #f7f7f7;
+        padding: 8px 6px;
+        text-align: center;
+        font-weight: 600;
+        border-bottom: 2px solid #ddd;
+      }
+      td {
+        padding: 7px 6px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+      }
+      tr.total-row td {
+        font-weight: 700;
+        border-top: 2px solid #4a90d9;
+        background: #f0f7ff;
+      }
+      .note {
+        font-size: 12px;
+        color: #999;
+        margin-top: 10px;
+      }
+
+      .rate-table {
+        font-size: 12px;
+      }
+      .rate-table td {
+        padding: 3px 6px;
+      }
+      /* ---------- 指南按钮 ---------- */
+      .guide-btn {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 999;
+        width: auto;
+        padding: 8px 16px;
+        background: #fff;
+        color: #4a90d9;
+        border: 1px solid #4a90d9;
+        border-radius: 20px;
+        font-size: 13px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+      }
+      .guide-btn:hover {
+        background: #4a90d9;
+        color: #fff;
+      }
+
+      /* ---------- 指南弹窗 ---------- */
+      .guide-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 20px;
+        overflow-y: auto;
+      }
+      .guide-overlay.show {
+        display: flex;
+      }
+      .guide-modal {
+        background: #fff;
+        border-radius: 12px;
+        max-width: 720px;
+        width: 100%;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 30px 32px;
+        position: relative;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+      }
+      .guide-close {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: #eee;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        color: #666;
+        line-height: 32px;
+        text-align: center;
+        padding: 0;
+      }
+      .guide-close:hover {
+        background: #ddd;
+      }
+      .guide-modal h2 {
+        font-size: 20px;
+        margin: 20px 0 10px;
+        color: #333;
+        border-bottom: 2px solid #4a90d9;
+        padding-bottom: 6px;
+      }
+      .guide-modal h3 {
+        font-size: 16px;
+        margin: 16px 0 8px;
+        color: #555;
+      }
+      .guide-modal h4 {
+        font-size: 14px;
+        margin: 12px 0 6px;
+        color: #666;
+      }
+      .guide-modal p, .guide-modal li {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #444;
+      }
+      .guide-modal ul, .guide-modal ol {
+        padding-left: 20px;
+        margin: 6px 0;
+      }
+      .guide-modal table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 12px;
+      }
+      .guide-modal th {
+        background: #f0f7ff;
+        padding: 6px 8px;
+        text-align: center;
+        border: 1px solid #ddd;
+      }
+      .guide-modal td {
+        padding: 5px 8px;
+        text-align: center;
+        border: 1px solid #eee;
+      }
+      .guide-modal blockquote {
+        border-left: 3px solid #4a90d9;
+        padding: 6px 14px;
+        margin: 10px 0;
+        background: #f0f7ff;
+        color: #555;
+        font-size: 13px;
+      }
+      .guide-modal code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+      }
+      .guide-modal pre {
+        background: #f8f8f8;
+        border: 1px solid #eee;
+        border-radius: 6px;
+        padding: 12px;
+        overflow-x: auto;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+      .guide-modal hr {
+        border: none;
+        border-top: 1px solid #eee;
+        margin: 14px 0;
+      }
