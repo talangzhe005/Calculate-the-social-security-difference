@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>杭州社保补缴差额计算器</title>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: -apple-system, "Microsoft YaHei", sans-serif;
+        background: #f5f5f5;
+        padding: 20px;
+        color: #333;
+      }
+      .container {
+        max-width: 760px;
+        margin: 0 auto;
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 6px;
+        font-size: 22px;
+      }
+      .subtitle {
+        text-align: center;
+        color: #888;
+        font-size: 13px;
+        margin-bottom: 20px;
+      }
+
+      .card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 20px 24px;
+        margin-bottom: 16px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      }
+
+      .row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .field {
+        flex: 1;
+        min-width: 140px;
+        margin-bottom: 14px;
+      }
+      .field label {
+        display: block;
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 4px;
+      }
+      .field input,
+      .field select {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 15px;
+      }
+      .field input:focus,
+      .field select:focus {
+        border-color: #4a90d9;
+        outline: none;
+      }
+
+      .hint {
+        font-size: 12px;
+        color: #999;
+        margin-top: 2px;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        background: #4a90d9;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        margin-top: 6px;
+      }
+      button:hover {
+        background: #3a7bc8;
+      }
+
+      .result {
+        display: none;
+      }
+      .result.show {
+        display: block;
+      }
+
+      .summary {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 16px;
+      }
+      .summary-box {
+        flex: 1;
+        min-width: 150px;
+        background: #f0f7ff;
+        border-radius: 8px;
+        padding: 14px;
+        text-align: center;
+      }
+      .summary-box .num {
+        font-size: 26px;
+        font-weight: 700;
+        color: #4a90d9;
+      }
+      .summary-box .num.orange {
+        color: #e8830c;
+      }
+      .summary-box .label {
+        font-size: 12px;
+        color: #888;
+        margin-top: 2px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+      }
+      th {
+        background: #f7f7f7;
+        padding: 8px 6px;
+        text-align: center;
+        font-weight: 600;
+        border-bottom: 2px solid #ddd;
+      }
+      td {
+        padding: 7px 6px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+      }
+      tr.total-row td {
+        font-weight: 700;
+        border-top: 2px solid #4a90d9;
+        background: #f0f7ff;
+      }
+      .note {
+        font-size: 12px;
+        color: #999;
+        margin-top: 10px;
+      }
+
+      .rate-table {
+        font-size: 12px;
+      }
+      .rate-table td {
+        padding: 3px 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>杭州社保补缴差额计算器</h1>
+      <p class="subtitle">余杭区 · 2021-2026年费率</p>
+
+      <!-- 输入区 -->
+      <div class="card">
+        <div class="row">
+          <div class="field">
+            <label>正确税前月工资（元）</label>
+            <input
+              type="number"
+              id="correctBase"
+              value="18000"
+              placeholder="如 18000"
+            />
+            <div class="hint">劳动合同约定的税前工资总额</div>
+          </div>
+          <div class="field">
+            <label>之前公司按什么基数交的（元）</label>
+            <input
+              type="number"
+              id="oldBase"
+              value="1700"
+              placeholder="如 1700"
+            />
+            <div class="hint">之前实际缴费基数，可在浙里办APP查到</div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>补缴起始年月</label>
+            <input type="month" id="startMonth" value="2021-01" />
+          </div>
+          <div class="field">
+            <label>补缴截止年月</label>
+            <input type="month" id="endMonth" value="2025-12" />
+          </div>
+          <div class="field">
+            <label>工伤费率（你公司的）</label>
+            <select id="injuryRate">
+              <option value="0.2">0.2%</option>
+              <option value="0.4">0.4%</option>
+              <option value="0.5" selected>0.5%（中档，不确定就选这个）</option>
+              <option value="0.7">0.7%</option>
+              <option value="0.9">0.9%</option>
+              <option value="1.1">1.1%</option>
+              <option value="1.3">1.3%</option>
+              <option value="1.5">1.5%</option>
+            </select>
+            <div class="hint">浙里办查历史明细反推，或选0.5%估算</div>
+          </div>
+        </div>
+        <button onclick="calculate()">计算补缴差额</button>
+      </div>
+
+      <!-- 结果区 -->
+      <div class="result" id="resultArea">
+        <div class="card">
+          <h3 style="margin-bottom: 12px">📊 计算结果</h3>
+          <div class="summary">
+            <div class="summary-box">
+              <div class="num" id="totalPersonal">--</div>
+              <div class="label">你个人需补缴（元）</div>
+            </div>
+            <div class="summary-box">
+              <div class="num orange" id="totalCompany">--</div>
+              <div class="label">公司需补缴（元）</div>
+            </div>
+            <div class="summary-box">
+              <div class="num" id="totalMonthCount">--</div>
+              <div class="label">补缴月数</div>
+            </div>
+          </div>
+          <div class="note">
+            ⚠️ 滞纳金依法由公司承担（《社会保险法》第86条），不在此列。
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 12px">📋 分段明细</h3>
+          <div style="overflow-x: auto">
+            <table id="detailTable">
+              <thead>
+                <tr>
+                  <th>时间段</th>
+                  <th>月数</th>
+                  <th>基数差额</th>
+                  <th>个人月补<br />(差额×10.5%)</th>
+                  <th>个人小计</th>
+                  <th>单位月补<br />(差额×单位%)</th>
+                  <th>单位小计</th>
+                </tr>
+              </thead>
+              <tbody id="detailBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3 style="margin-bottom: 8px">📋 各段费率参考</h3>
+          <table class="rate-table">
+            <thead>
+              <tr>
+                <th>时间段</th>
+                <th>养老(单位)</th>
+                <th>医疗(单位)</th>
+                <th>失业(各)</th>
+                <th>工伤(单位)</th>
+                <th>个人合计</th>
+                <th>单位合计</th>
+              </tr>
+            </thead>
+            <tbody id="rateBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 费率定义
+      const PERIODS = [
+        {
+          label: "2021年1-9月",
+          start: "2021-01",
+          end: "2021-09",
+          pensionCo: 14,
+          medicalCo: 9.5,
+          unemp: 0.5,
+          injuryCo: null,
+        },
+        {
+          label: "2021年10-12月",
+          start: "2021-10",
+          end: "2021-12",
+          pensionCo: 14,
+          medicalCo: 9.5,
+          unemp: 0.5,
+          injuryCo: null,
+        },
+        {
+          label: "2022年1-8月",
+          start: "2022-01",
+          end: "2022-08",
+          pensionCo: 15,
+          medicalCo: 9.5,
+          unemp: 0.5,
+          injuryCo: null,
+        },
+        {
+          label: "2022年9-12月",
+          start: "2022-09",
+          end: "2022-12",
+          pensionCo: 14,
+          medicalCo: 9.5,
+          unemp: 0.5,
+          injuryCo: null,
+        },
+        {
+          label: "2023全年",
+          start: "2023-01",
+          end: "2023-12",
+          pensionCo: 14,
+          medicalCo: 9.5,
+          unemp: 0.5,
+          injuryCo: null,
+        },
+        {
+          label: "2024年1-3月",
+          start: "2024-01",
+          end: "2024-03",
+          pensionCo: 14,
+          medicalCo: 9.5,
+          unemp: 0.5,
+          injuryCo: null,
+        },
+        {
+          label: "2024年4-12月",
+          start: "2024-04",
+          end: "2024-12",
+          pensionCo: 15,
+          medicalCo: 9.5,
+          unemp: 0.5,
+          injuryCo: null,
+        },
+        {
+          label: "2025全年",
+          start: "2025-01",
+          end: "2025-12",
+          pensionCo: 16,
+          medicalCo: 9.5,
+          unemp: 0.5,
+          injuryCo: null,
+        },
+        {
+          label: "2026全年",
+          start: "2026-01",
+          end: "2026-12",
+          pensionCo: 16,
+          medicalCo: 9.5,
+          unemp: 0.5,
+          injuryCo: null,
+        },
+      ];
+
+      const INDIVIDUAL_TOTAL = 10.5; // 个人总比例：养老8% + 医疗2% + 失业0.5%
+
+      function getMonthsInRange(startYM, endYM) {
+        // startYM, endYM 是 "YYYY-MM" 格式
+        const [sy, sm] = startYM.split("-").map(Number);
+        const [ey, em] = endYM.split("-").map(Number);
+        const start = new Date(sy, sm - 1, 1);
+        const end = new Date(ey, em - 1, 1);
+        const months = [];
+        const cur = new Date(start);
+        while (cur <= end) {
+          months.push(
+            cur.getFullYear() +
+              "-" +
+              String(cur.getMonth() + 1).padStart(2, "0"),
+          );
+          cur.setMonth(cur.getMonth() + 1);
+        }
+        return months;
+      }
+
+      function ymCompare(a, b) {
+        // 返回 a <= b
+        const [ay, am] = a.split("-").map(Number);
+        const [by, bm] = b.split("-").map(Number);
+        if (ay !== by) return ay <= by;
+        return am <= bm;
+      }
+
+      function calculate() {
+        const correctBase =
+          parseFloat(document.getElementById("correctBase").value) || 0;
+        const oldBase =
+          parseFloat(document.getElementById("oldBase").value) || 0;
+        const startYM = document.getElementById("startMonth").value;
+        const endYM = document.getElementById("endMonth").value;
+        const injuryRate =
+          parseFloat(document.getElementById("injuryRate").value) || 0.5;
+
+        if (!correctBase || oldBase === undefined || !startYM || !endYM) {
+          alert("请填写所有字段");
+          return;
+        }
+        if (correctBase <= oldBase) {
+          alert("正确基数必须大于之前的基数");
+          return;
+        }
+        if (!ymCompare(startYM, endYM)) {
+          alert("起始年月不能晚于截止年月");
+          return;
+        }
+
+        const baseDiff = correctBase - oldBase;
+        const allMonths = getMonthsInRange(startYM, endYM);
+
+        // 将月份分配到各时间段
+        const segments = [];
+        for (const period of PERIODS) {
+          const monthsInPeriod = allMonths.filter(
+            (m) => ymCompare(period.start, m) && ymCompare(m, period.end),
+          );
+          if (monthsInPeriod.length === 0) continue;
+
+          const coRate =
+            period.pensionCo + period.medicalCo + period.unemp + injuryRate;
+          segments.push({
+            label: period.label,
+            months: monthsInPeriod.length,
+            pensionCo: period.pensionCo,
+            medicalCo: period.medicalCo,
+            unemp: period.unemp,
+            injuryCo: injuryRate,
+            coRate: coRate,
+            indMonthly: (baseDiff * INDIVIDUAL_TOTAL) / 100,
+            coMonthly: (baseDiff * coRate) / 100,
+          });
+        }
+
+        // 构建明细表
+        let totalPersonal = 0,
+          totalCompany = 0,
+          totalMonths = 0;
+        let html = "";
+        for (const seg of segments) {
+          const indSub = seg.indMonthly * seg.months;
+          const coSub = seg.coMonthly * seg.months;
+          totalPersonal += indSub;
+          totalCompany += coSub;
+          totalMonths += seg.months;
+
+          html += `<tr>
+      <td>${seg.label}</td>
+      <td>${seg.months}</td>
+      <td>${baseDiff.toFixed(0)}</td>
+      <td>${seg.indMonthly.toFixed(2)}</td>
+      <td>${indSub.toFixed(2)}</td>
+      <td>${seg.coMonthly.toFixed(2)}</td>
+      <td>${coSub.toFixed(2)}</td>
+    </tr>`;
+        }
+        html += `<tr class="total-row">
+    <td>合计</td>
+    <td>${totalMonths}</td>
+    <td>${baseDiff.toFixed(0)}</td>
+    <td>—</td>
+    <td>${totalPersonal.toFixed(2)}</td>
+    <td>—</td>
+    <td>${totalCompany.toFixed(2)}</td>
+  </tr>`;
+
+        document.getElementById("detailBody").innerHTML = html;
+        document.getElementById("totalPersonal").textContent =
+          totalPersonal.toFixed(2);
+        document.getElementById("totalCompany").textContent =
+          totalCompany.toFixed(2);
+        document.getElementById("totalMonthCount").textContent = totalMonths;
+
+        // 费率表
+        let rateHtml = "";
+        for (const seg of segments) {
+          rateHtml += `<tr>
+      <td>${seg.label}</td>
+      <td>${seg.pensionCo}%</td>
+      <td>${seg.medicalCo}%</td>
+      <td>${seg.unemp}%</td>
+      <td>${seg.injuryCo}%</td>
+      <td><b>${INDIVIDUAL_TOTAL}%</b></td>
+      <td><b>${seg.coRate.toFixed(1)}%</b></td>
+    </tr>`;
+        }
+        document.getElementById("rateBody").innerHTML = rateHtml;
+
+        document.getElementById("resultArea").classList.add("show");
+      }
+    </script>
+  </body>
+</html>
