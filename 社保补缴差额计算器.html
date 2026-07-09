@@ -414,9 +414,155 @@
       .rate-table td {
         padding: 3px 6px;
       }
+      /* ---------- 指南按钮 ---------- */
+      .guide-btn {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 999;
+        width: auto;
+        padding: 8px 16px;
+        background: #fff;
+        color: #4a90d9;
+        border: 1px solid #4a90d9;
+        border-radius: 20px;
+        font-size: 13px;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+      }
+      .guide-btn:hover {
+        background: #4a90d9;
+        color: #fff;
+      }
+
+      /* ---------- 指南弹窗 ---------- */
+      .guide-overlay {
+        display: none;
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.5);
+        z-index: 9999;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 40px 20px;
+        overflow-y: auto;
+      }
+      .guide-overlay.show {
+        display: flex;
+      }
+      .guide-modal {
+        background: #fff;
+        border-radius: 12px;
+        max-width: 720px;
+        width: 100%;
+        max-height: 85vh;
+        overflow-y: auto;
+        padding: 30px 32px;
+        position: relative;
+        box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+      }
+      .guide-close {
+        position: absolute;
+        top: 12px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: #eee;
+        border-radius: 50%;
+        font-size: 18px;
+        cursor: pointer;
+        color: #666;
+        line-height: 32px;
+        text-align: center;
+        padding: 0;
+      }
+      .guide-close:hover {
+        background: #ddd;
+      }
+      .guide-modal h2 {
+        font-size: 20px;
+        margin: 20px 0 10px;
+        color: #333;
+        border-bottom: 2px solid #4a90d9;
+        padding-bottom: 6px;
+      }
+      .guide-modal h3 {
+        font-size: 16px;
+        margin: 16px 0 8px;
+        color: #555;
+      }
+      .guide-modal h4 {
+        font-size: 14px;
+        margin: 12px 0 6px;
+        color: #666;
+      }
+      .guide-modal p, .guide-modal li {
+        font-size: 13px;
+        line-height: 1.7;
+        color: #444;
+      }
+      .guide-modal ul, .guide-modal ol {
+        padding-left: 20px;
+        margin: 6px 0;
+      }
+      .guide-modal table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 10px 0;
+        font-size: 12px;
+      }
+      .guide-modal th {
+        background: #f0f7ff;
+        padding: 6px 8px;
+        text-align: center;
+        border: 1px solid #ddd;
+      }
+      .guide-modal td {
+        padding: 5px 8px;
+        text-align: center;
+        border: 1px solid #eee;
+      }
+      .guide-modal blockquote {
+        border-left: 3px solid #4a90d9;
+        padding: 6px 14px;
+        margin: 10px 0;
+        background: #f0f7ff;
+        color: #555;
+        font-size: 13px;
+      }
+      .guide-modal code {
+        background: #f4f4f4;
+        padding: 2px 6px;
+        border-radius: 3px;
+        font-size: 12px;
+      }
+      .guide-modal pre {
+        background: #f8f8f8;
+        border: 1px solid #eee;
+        border-radius: 6px;
+        padding: 12px;
+        overflow-x: auto;
+        font-size: 12px;
+        line-height: 1.6;
+      }
+      .guide-modal hr {
+        border: none;
+        border-top: 1px solid #eee;
+        margin: 14px 0;
+      }
     </style>
   </head>
   <body>
+    <!-- 右上角指南按钮 -->
+    <button class="guide-btn" onclick="openGuide()">📖 补缴核实指南</button>
+
+    <!-- 指南弹窗 -->
+    <div class="guide-overlay" id="guideOverlay" onclick="if(event.target===this)closeGuide()">
+      <div class="guide-modal" id="guideModal"></div>
+    </div>
+
     <div class="container">
       <h1>杭州社保补缴差额计算器</h1>
       <p class="subtitle">余杭区 · 2021-2026年费率</p>
@@ -676,6 +822,210 @@
     </div>
 
     <script>
+      // ==================== 指南弹窗 ====================
+      const GUIDE_MD = `# 杭州（余杭区）社保补缴核实指南
+
+> 公司补缴社保后，怎么确定金额对不对？这份指南帮你逐月核对。
+> 适用：杭州余杭区（执行浙江省统一标准）。
+
+---
+
+## 第一步：确定你的缴费基数
+
+**你的缴费基数 = 税前月工资（应发工资）**
+
+- 包括：基本工资 + 绩效 + 加班费 + 津贴补贴 + 其他工资性收入
+- 不管公司分几笔发、哪天发，合计的税前工资就是基数
+- 可以对照劳动合同、银行流水、个税APP申报收入来确认
+
+如果你的税前月工资在当年上下限之间，就按全额计算。如果工资超过上限按上限算，低于下限按下限算。
+
+> 历年上下限参考（供确认你的工资是否在范围内）：
+>
+> | 年份 | 下限 | 上限 |
+> |------|:----:|:----:|
+> | 2021（1-9月） | 3,322 | 17,881 |
+> | 2021（10-12月） | 3,957 | 19,783 |
+> | 2022 | 3,957 | 22,311 |
+> | 2023 | 4,462 | 24,060 |
+> | 2024 | 4,812 | 24,930 |
+> | 2025 | 4,986 | 25,299 |
+> | 2026 | 暂同2025年 |
+
+---
+
+## 第二步：找到对应年份的缴费比例
+
+### 个人部分（2021-2026 全程不变）
+
+| 险种 | 比例 |
+|------|:----:|
+| 养老保险 | **8%** |
+| 医疗保险（含生育） | **2%** |
+| 失业保险 | **0.5%** |
+| 工伤保险 | 0 |
+| **个人合计** | **10.5%** |
+
+### 单位部分（养老比例逐年变过，其他不变）
+
+| 时间段 | 养老 | 医疗（含生育） | 失业 | 工伤（估） | 单位合计 |
+|--------|:----:|:----------:|:----:|:--------:|:------:|
+| 2021全年 | 14% | 9.5% | 0.5% | 0.5% | **24.5%** |
+| 2022年1-8月 | 15% | 9.5% | 0.5% | 0.5% | **25.5%** |
+| 2022年9-12月 | 14% | 9.5% | 0.5% | 0.5% | **24.5%** |
+| 2023全年 | 14% | 9.5% | 0.5% | 0.5% | **24.5%** |
+| 2024年1-3月 | 14% | 9.5% | 0.5% | 0.5% | **24.5%** |
+| 2024年4-12月 | 15% | 9.5% | 0.5% | 0.5% | **25.5%** |
+| 2025全年 | 16% | 9.5% | 0.5% | 0.5% | **26.5%** |
+| 2026（暂） | 16% | 9.5% | 0.5% | 0.5% | **26.5%** |
+
+> **工伤费率说明**：实际 0.2%-1.5% 分八档，每家不同，表中取 0.5% 估算。在浙里办APP查一次历史缴费记录就能反推出你公司的实际费率（单位工伤缴费金额 ÷ 基数）。
+
+---
+
+## 第三步：计算你应该缴多少
+
+### 公式
+
+\`\`\`
+个人月缴 = 你的税前月工资 × 10.5%
+单位月缴 = 你的税前月工资 × 单位合计比例（查上表）
+\`\`\`
+
+---
+
+## 第四步：在浙里办APP核实
+
+补缴到账后，按以下渠道查询，逐月对照：
+
+| 渠道 | 操作 |
+|------|------|
+| **浙里办APP** | 搜"社保查询" → "缴费明细" → 查对应月份 |
+| **支付宝** | 搜"电子社保卡" → "社保查询" |
+| **电话** | 0571-12333 |
+| **线下** | 余杭区社保中心柜台，带身份证打印《个人权益记录》 |
+
+### 逐月核对三项
+
+| 核对项 | 应该等于 |
+|--------|---------|
+| 缴费基数 | 你的税前月工资 |
+| 个人缴费金额 | 基数 × 10.5% |
+| 单位缴费金额 | 基数 × 单位合计比例（看哪年） |
+
+---
+
+## 第五步：钱怎么分摊
+
+| 谁来掏 | 掏什么 | 金额 |
+|--------|--------|------|
+| 你 | 个人部分 | 月缴 × 补缴月数 |
+| 公司 | 单位部分 | 月缴 × 补缴月数 |
+| 公司 | 滞纳金 | 全部（《社会保险法》第86条） |
+
+> **公司如果让你掏单位部分或滞纳金，是不合理的，可以拒绝。**
+
+---
+
+## 第六步：发现问题怎么处理
+
+\`\`\`
+联系公司要求书面解释
+    ↓ 不解决
+拨打 0571-12333 投诉
+    ↓ 仍不解决
+余杭区劳动监察大队书面举报
+    ↓
+劳动仲裁（需准备：劳动合同、银行流水、个税APP申报记录）
+\`\`\`
+
+---
+
+## 常见问题
+
+**Q：工资分两笔发，公司只按一笔交社保？**
+A：不对。社保基数应按工资总额计算，不管分几笔发。个税APP和劳动合同能证明你的全额工资。
+
+**Q：公司说补缴基数"按最低档就行"？**
+A：不对。法定基数是你的实际工资，不是下限。按最低档交属于少缴，可以要求更正。
+
+**Q：已经离职了，还能追缴吗？**
+A：可以。社保追缴不受在职与否限制，向劳动监察大队或社保稽核科投诉即可。
+
+**Q：个人部分的钱，什么时候交给公司？**
+A：正常情况应该从你工资里代扣。补缴时，公司可能要求你先把个人部分交给他，再由公司统一缴到社保。交之前先确认金额对不对。
+
+---
+
+> 编写日期：2026年7月3日 | 数据来源：浙江省人社厅（浙人社发〔2021〕54号 至 〔2025〕52号）`;
+
+      function renderMarkdown(md) {
+        let html = md;
+        // 转义 HTML
+        html = html.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        // 代码块
+        html = html.replace(/```([\s\S]*?)```/g, "<pre><code>$1</code></pre>");
+        // 行内代码
+        html = html.replace(/`([^`]+)`/g, "<code>$1</code>");
+        // 粗体
+        html = html.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+        // 标题
+        html = html.replace(/^#### (.+)$/gm, "<h4>$1</h4>");
+        html = html.replace(/^### (.+)$/gm, "<h4>$1</h4>");
+        html = html.replace(/^## (.+)$/gm, "<h3>$1</h3>");
+        html = html.replace(/^# (.+)$/gm, "<h2>$1</h2>");
+        // 水平线
+        html = html.replace(/^---$/gm, "<hr>");
+        // 引用块（多行）
+        html = html.replace(/^&gt; (.+)$/gm, "<blockquote>$1</blockquote>");
+        // 合并相邻引用
+        html = html.replace(/<\/blockquote>\n<blockquote>/g, "<br>");
+        // 表格
+        html = html.replace(/^\|(.+)\|$/gm, (line) => {
+          const cells = line.split("|").filter((c, i, arr) => i > 0 && i < arr.length - 1);
+          const isHeader = cells.some(c => /^[\s:-]+$/.test(c));
+          if (isHeader) return "<!-- table sep -->";
+          const tag = line.includes("<!-- table sep -->") ? "th" : "td";
+          return "<tr>" + cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join("") + "</tr>";
+        });
+        // Wrap consecutive <tr>s
+        html = html.replace(/(<tr>[\s\S]*?<\/tr>)\n(?=<tr>)/g, "$1");
+        html = html.replace(/((?:<tr>[\s\S]*?<\/tr>\n?)+)/g, (match) => {
+          if (match.includes("<!-- table sep -->")) {
+            const rows = match.replace(/<!-- table sep -->\n?/g, "");
+            const thead = rows.match(/^(<tr>.*?<\/tr>)/);
+            const tbody = rows.replace(/^<tr>.*?<\/tr>\n?/, "");
+            return "<table>" + (thead ? "<thead>" + thead[1] + "</thead>" : "") + "<tbody>" + tbody + "</tbody></table>";
+          }
+          return "<table>" + match + "</table>";
+        });
+        // 无序列表
+        html = html.replace(/^- (.+)$/gm, "<li>$1</li>");
+        html = html.replace(/((?:<li>.*?<\/li>\n?)+)/g, "<ul>$1</ul>");
+        // 有序列表（简单数字）
+        html = html.replace(/^\d+\. (.+)$/gm, "<li>$1</li>");
+        // 段落（未被标签包裹的行）
+        html = html.replace(/^(?!<[a-z/!])(.+)$/gm, "<p>$1</p>");
+        // 清理空段落
+        html = html.replace(/<p>\s*<\/p>/g, "");
+        // 恢复转义
+        html = html.replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
+        return html;
+      }
+
+      function openGuide() {
+        document.getElementById("guideModal").innerHTML =
+          '<button class="guide-close" onclick="closeGuide()">✕</button>' +
+          renderMarkdown(GUIDE_MD);
+        document.getElementById("guideOverlay").classList.add("show");
+        document.body.style.overflow = "hidden";
+      }
+
+      function closeGuide() {
+        document.getElementById("guideOverlay").classList.remove("show");
+        document.body.style.overflow = "";
+      }
+
       // ==================== 常量 ====================
       const PERIODS = [
         { label: "2021年1-9月",  start: "2021-01", end: "2021-09", pensionCo: 14, medicalCo: 9.5, unemp: 0.5, injuryCo: null },
